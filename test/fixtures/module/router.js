@@ -5,8 +5,9 @@ Vue.use(Router)
 
 const indexPage = () => import('~/views/index.vue').then(m => m.default || m)
 const aboutPage = () => import('~/views/about.vue').then(m => m.default || m)
+const layoutPage = () => import('~/views/layout.vue').then(m => m.default || m)
 
-export function createRouter () {
+export function createRouter() {
   return new Router({
     mode: 'history',
     routes: [
@@ -19,6 +20,11 @@ export function createRouter () {
         path: '/about',
         component: aboutPage,
         name: 'about'
+      },
+      {
+        path: '/layout',
+        component: layoutPage,
+        name: 'layout'
       }
     ]
   })

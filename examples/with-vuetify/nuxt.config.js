@@ -1,7 +1,6 @@
+import nodeExternals from 'webpack-node-externals'
 
-const { join } = require('path')
-
-module.exports = {
+export default {
   /*
   ** Head elements
   ** Add Roboto font and Material Icons
@@ -11,19 +10,25 @@ module.exports = {
       { rel: 'stylesheet', type: 'text/css', href: 'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' }
     ]
   },
-  /*
-  ** Add Vuetify into vendor.bundle.js
-  */
+
   build: {
-    vendor: ['vuetify'],
-    extractCSS: true
+    extractCSS: true,
+    extend(config, ctx) {
+      if (ctx.isServer) {
+        config.externals = [
+          nodeExternals({
+            whitelist: [/^vuetify/]
+          })
+        ]
+      }
+    }
   },
   /*
   ** Load Vuetify into the app
   */
-  plugins: ['~plugins/vuetify'],
+  plugins: ['~/plugins/vuetify'],
   /*
   ** Load Vuetify CSS globally
   */
-  css: ['~assets/app.styl']
+  css: ['~/assets/app.styl']
 }

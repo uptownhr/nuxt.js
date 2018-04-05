@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   env: {
     baseUrl: process.env.BASE_URL || 'http://localhost:3000'
   },
@@ -18,9 +18,6 @@ module.exports = {
   /*
   ** Build configuration
   */
-  css: ['tachyons/css/tachyons.min.css', '~assets/css/main.css'],
-  build: {
-    vendor: ['axios', 'gsap', 'vuex-class', 'nuxt-class-component']
-  },
-  modules: ['~modules/typescript']
+  css: ['tachyons/css/tachyons.min.css', '~/assets/css/main.css'],
+  modules: ['~/modules/typescript']
 }

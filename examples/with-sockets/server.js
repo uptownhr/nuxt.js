@@ -1,24 +1,27 @@
-const Nuxt = require('nuxt')
-const app = require('express')()
-const server = require('http').createServer(app)
-const io = require('socket.io')(server)
+import http from 'http'
+
+import { Nuxt, Builder } from 'nuxt'
+import express from 'express'
+import SocketIO from 'socket.io'
+
 const port = process.env.PORT || 3000
 const isProd = process.env.NODE_ENV === 'production'
+
+const app = express()
+const server = http.createServer(app)
+const io = SocketIO(server)
 
 // We instantiate Nuxt.js with the options
 let config = require('./nuxt.config.js')
 config.dev = !isProd
-const nuxt = new Nuxt(config)
-app.use(nuxt.render)
 
-// Build only in dev mode
+const nuxt = new Nuxt(config)
+// Start build process in dev mode
 if (config.dev) {
-  nuxt.build()
-  .catch((error) => {
-    console.error(error) // eslint-disable-line no-console
-    process.exit(1)
-  })
+  const builder = new Builder(nuxt)
+  builder.build()
 }
+app.use(nuxt.render)
 
 // Listen the server
 server.listen(port, '0.0.0.0')
@@ -29,9 +32,9 @@ let messages = []
 io.on('connection', (socket) => {
   socket.on('last-messages', function (fn) {
     fn(messages.slice(-50))
-  });
+  })
   socket.on('send-message', function (message) {
     messages.push(message)
     socket.broadcast.emit('new-message', message)
   })
-});
+})

@@ -1,0 +1,126 @@
+version: 2
+
+defaults: &defaults
+  working_directory: ~/project/nuxt
+  docker:
+    - image: banian/node-headless-chrome
+
+jobs:
+  setup:
+    <<: *defaults
+    steps:
+      # Checkout repository
+      - checkout
+
+      # Restore cache
+      - restore_cache:
+          key: yarn-{{ checksum "yarn.lock" }}
+
+      # Install dependencies
+      - run:
+          name: Install Dependencies
+          command: NODE_ENV=dev yarn
+
+      # Keep cache
+      - save_cache:
+          key: yarn-{{ checksum "yarn.lock" }}
+          paths:
+            - "node_modules"
+
+      # Persist files
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - nuxt
+
+  lint:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Lint and Security
+          command: yarn test:lint
+
+  build:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Build Fixtures
+          command: yarn build && yarn test:fixtures && yarn coverage
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - nuxt/test/fixtures
+            - nuxt/dist
+    environment:
+      - NODE_ENV: "test"
+
+  test-unit:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: Unit Test
+          command: yarn test:unit && yarn coverage
+    environment:
+      - NODE_ENV: "test"
+
+  test-e2e:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: E2E Test
+          command: yarn test:e2e && yarn coverage
+    environment:
+      - NODE_ENV: "test"
+
+  release:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - run:
+          name: release
+          command: |
+            echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+            echo "//registry.yarnpkg.com/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+            ./scripts/release-edge
+
+workflows:
+  version: 2
+  setup-and-parallel-test:
+    jobs:
+      - setup
+
+      - lint:
+          requires:
+            - setup
+
+      - build:
+          requires:
+            - setup
+
+      - test-unit:
+          requires:
+            - build
+
+      - test-e2e:
+          requires:
+            - build
+
+      - release:
+          requires:
+            - build
+            - lint
+            - test-unit
+            - test-e2e
+          filters:
+            branches:
+              only:
+                - dev

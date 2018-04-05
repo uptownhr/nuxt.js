@@ -1,5 +1,5 @@
 {
-  "name": "with-feathers",
+  "name": "example-with-feathers",
   "description": "Nuxt.js with FeathersJS",
   "version": "1.0.0",
   "main": "src/",
@@ -37,6 +37,7 @@
     "winston": "^2.3.0"
   },
   "devDependencies": {
+    "eslint-plugin-mocha": "^4.11.0",
     "jshint": "^2.9.4",
     "mocha": "^3.2.0",
     "nodemon": "^1.11.0",

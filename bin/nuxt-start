@@ -1,18 +1,21 @@
 #!/usr/bin/env node
-
 const fs = require('fs')
+const { resolve } = require('path')
 const parseArgs = require('minimist')
-const { Nuxt } = require('../')
-const { join, resolve } = require('path')
+const consola = require('consola')
+const { Nuxt } = require('..')
+const { loadNuxtConfig, getLatestHost } = require('./common/utils')
 
 const argv = parseArgs(process.argv.slice(2), {
   alias: {
     h: 'help',
     H: 'hostname',
     p: 'port',
-    c: 'config-file'
+    c: 'config-file',
+    s: 'spa',
+    u: 'universal'
   },
-  boolean: ['h'],
+  boolean: ['h', 's', 'u'],
   string: ['H', 'c'],
   default: {
     c: 'nuxt.config.js'
@@ -20,53 +23,61 @@ const argv = parseArgs(process.argv.slice(2), {
 })
 
 if (argv.hostname === '') {
-  console.error(`> Provided hostname argument has no value`)
-  process.exit(1)
+  consola.fatal('Provided hostname argument has no value')
 }
 
 if (argv.help) {
-  console.log(`
+  process.stderr.write(`
     Description
       Starts the application in production mode.
       The application should be compiled with \`nuxt build\` first.
     Usage
       $ nuxt start <dir> -p <port number> -H <hostname>
     Options
-      --port, -p          A port number on which to start the application
-      --hostname, -H      Hostname on which to start the application
-      --config-file, -c   Path to Nuxt.js config file (default: nuxt.config.js)
-      --help, -h          Displays this message
+      --port, -p            A port number on which to start the application
+      --hostname, -H        Hostname on which to start the application
+      --spa                 Launch in SPA mode
+      --universal           Launch in Universal mode (default)
+      --config-file, -c     Path to Nuxt.js config file (default: nuxt.config.js)
+      --help, -h            Displays this message
   `)
   process.exit(0)
 }
 
-const rootDir = resolve(argv._[0] || '.')
-const nuxtConfigFile = resolve(rootDir, argv['config-file'])
-
-let options = {}
-
-if (fs.existsSync(nuxtConfigFile)) {
-  options = require(nuxtConfigFile)
-} else if (argv['config-file'] !== 'nuxt.config.js') {
-  console.error(`> Could not load config file ${argv['config-file']}`)
-  process.exit(1)
-}
-
-if (typeof options.rootDir !== 'string') {
-  options.rootDir = rootDir
-}
+const options = loadNuxtConfig(argv)
 
 // Force production mode (no webpack middleware called)
 options.dev = false
 
+const nuxt = new Nuxt(options)
+
+// Setup hooks
+nuxt.hook('error', (_err) => consola.fatal(_err))
+
 // Check if project is built for production
-const distDir = join(options.rootDir, options.buildDir || '.nuxt', 'dist')
-if (!fs.existsSync(join(distDir, 'server-bundle.json'))) {
-  console.error('> No build files found, please run `nuxt build` before launching `nuxt start`') // eslint-disable-line no-console
-  process.exit(1)
+const distDir = resolve(
+  nuxt.options.rootDir,
+  nuxt.options.buildDir || '.nuxt',
+  'dist'
+)
+if (!fs.existsSync(distDir)) {
+  consola.fatal(
+    'No build files found, please run `nuxt build` before launching `nuxt start`'
+  )
 }
 
-const nuxt = new Nuxt(options)
-const port = argv.port || process.env.PORT || process.env.npm_package_config_nuxt_port
-const host = argv.hostname || process.env.HOST || process.env.npm_package_config_nuxt_host
-nuxt.listen(port, host)
+// Check if SSR Bundle is required
+if (nuxt.options.render.ssr === true) {
+  const ssrBundlePath = resolve(distDir, 'server-bundle.json')
+  if (!fs.existsSync(ssrBundlePath)) {
+    consola.fatal(
+      'No SSR build! Please start with `nuxt start --spa` or build using `nuxt build --universal`'
+    )
+  }
+}
+
+const { port, host } = getLatestHost(argv)
+
+nuxt.listen(port, host).then(() => {
+  nuxt.showReady(false)
+})

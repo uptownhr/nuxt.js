@@ -1,11 +1,9 @@
-'use strict';
-const authentication = require('./authentication');
-const user = require('./user');
+import authentication from './authentication'
+import user from './user'
 
-module.exports = function() {
-  const app = this;
-  
-  
-  app.configure(authentication);
-  app.configure(user);
-};
+export default function () {
+  const app = this
+
+  app.configure(authentication)
+  app.configure(user)
+}

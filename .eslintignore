@@ -1,0 +1,6 @@
+app
+node_modules
+dist
+.nuxt
+examples/coffeescript/pages/index.vue
+!examples/storybook/.storybook

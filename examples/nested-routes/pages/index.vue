@@ -3,26 +3,36 @@
     <div class="left">
       <h2><nuxt-link to="/">Players</nuxt-link></h2>
       <ul class="players">
-        <li v-for="user in users">
+        <li v-for="user in users" :key="user.id">
           <nuxt-link :to="'/'+user.id">{{ user.name }}</nuxt-link>
         </li>
       </ul>
     </div>
     <div class="right">
-      <nuxt-child/>
+      <nuxt-child :key="$route.params.id"/>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  asyncData ({ env }) {
+  asyncData({ env }) {
     return { users: env.users }
   }
 }
 </script>
 
 <style scoped>
+.page-enter-active, .page-leave-active {
+  transition: opacity .4s, transform .4s;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  opacity: 1;
+}
+.page-enter, .page-leave-active {
+  opacity: 0.5;
+  transform: rotateY(100deg);
+}
 .container {
   width: 100%;
   margin: 0;

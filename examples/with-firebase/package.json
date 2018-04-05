@@ -1,5 +1,5 @@
 {
-  "name": "nuxt-firebase",
+  "name": "example-with-firebase",
   "version": "1.0.0",
   "description": "Nuxt.js with Firebase",
   "scripts": {
@@ -15,6 +15,6 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.15.3",
-    "nuxt": "^0.9.9"
+    "nuxt": "latest"
   }
 }

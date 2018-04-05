@@ -1,7 +1,8 @@
 <p align="center"><img align="center" src="http://imgur.com/V4LtoII.png"/></p>
 <p align="center">
+  <a href="https://circleci.com/gh/nuxt/nuxt.js"><img src="https://img.shields.io/circleci/project/github/nuxt/nuxt.js.svg" alt="Build Status"></a>
   <a href="https://travis-ci.org/nuxt/nuxt.js"><img src="https://img.shields.io/travis/nuxt/nuxt.js/master.svg" alt="Build Status"></a>
-  <a href="https://ci.appveyor.com/project/Atinux/nuxt-js"><img src="https://ci.appveyor.com/api/projects/status/gwab06obc6srx9g4?svg=true" alt="Windows Build Status"></a>
+  <a href="https://ci.appveyor.com/project/nuxt/nuxt-js"><img src="https://ci.appveyor.com/api/projects/status/9ttoamt2c2gnwkko?svg=true" alt="Windows Build Status"></a>
   <a href="https://codecov.io/gh/nuxt/nuxt.js"><img src="https://img.shields.io/codecov/c/github/nuxt/nuxt.js/master.svg" alt="Coverage Status"></a>
   <a href="https://www.npmjs.com/package/nuxt"><img src="https://img.shields.io/npm/dm/nuxt.svg" alt="Downloads"></a>
   <a href="https://www.npmjs.com/package/nuxt"><img src="https://img.shields.io/npm/v/nuxt.svg" alt="Version"></a>
@@ -15,9 +16,29 @@
 
 </p>
 
-> Nuxt.js is a Versatile Vue.js Framework
+> Vue.js Meta Framework to create complex, fast & universal web application *quickly*.
 
-## 🚧 Under active development, [1.0](https://github.com/nuxt/nuxt.js/projects/1) will be released soon :fire:
+## Links
+
+- 📘 Documentation: [https://nuxtjs.org](https://nuxtjs.org)
+- 👥 [Community](https://nuxtjs.cmty.io)
+- 🎬 Video: [1 minute demo](https://www.youtube.com/watch?v=kmf-p-pTi40)
+- 🐦 Twitter: [@nuxt_js](https://twitter.com/nuxt_js)
+- 📦 [Nuxt.js Modules](https://github.com/nuxt-community/modules)
+- 👉 [Play with Nuxt.js online](https://glitch.com/edit/#!/nuxt-hello-world)
+
+## Features
+
+- Automatic transpilation and bundling (with webpack and babel)
+- Hot code reloading
+- Server-side rendering OR Single Page App OR Static Generated, you choose :fire:
+- Static file serving. `./static/` is mapped to `/`
+- Configurable with a `nuxt.config.js` file
+- Custom layouts with the `layouts/` directory
+- Middleware
+- Code splitting for every `pages/`
+
+Learn more at [nuxtjs.org](https://nuxtjs.org).
 
 ## Sponsors
 
@@ -93,18 +114,10 @@ Support us with a monthly donation and help us continue our activities. [[Become
 <a href="https://opencollective.com/nuxtjs/backer/29/website" target="_blank" rel="noopener noreferrer"><img src="https://opencollective.com/nuxtjs/backer/29/avatar.svg"></a>
 </p>
 
-## Links
-
-- 📘 Documentation: [https://nuxtjs.org](https://nuxtjs.org)
-- 🎬 Video: [1 minute demo](https://www.youtube.com/watch?v=kmf-p-pTi40)
-- 🐦 Twitter: [@nuxt_js](https://twitter.com/nuxt_js)
-- 👥 [Nuxt.js Community](https://github.com/nuxt-community)
-- 👉 [Play with Nuxt.js online](https://glitch.com/edit/#!/nuxt-hello-world)
-
 ## Getting started
 
 ```
-$ npm install nuxt --save
+$ npm install nuxt
 ```
 
 Add a script to your package.json like this:
@@ -142,35 +155,33 @@ npm start
 
 Go to [http://localhost:3000](http://localhost:3000)
 
-So far, we get:
-
-- Automatic transpilation and bundling (with webpack and babel)
-- Hot code reloading
-- Server rendering and indexing of `pages/`
-- Static file serving. `./static/` is mapped to `/`
-- Configurable with a `nuxt.config.js` file
-- Custom layouts with the `layouts/` directory
-- Middleware
-- Code splitting via webpack
-
-Learn more at [nuxtjs.org](https://nuxtjs.org).
-
 ## Templates
 
-You can start by using one of our starter templates:
-- [starter](https://github.com/nuxt/starter): Basic Nuxt.js project template
-- [express](https://github.com/nuxt/express): Nuxt.js + Express
-- [koa](https://github.com/nuxt/koa): Nuxt.js + Koa
-- [adonuxt](https://github.com/nuxt/adonuxt): Nuxt.js + AdonisJS
+:point_right: We recommend to start directly with our cli [create-nuxt-app](https://github.com/nuxt-community/create-nuxt-app) for the latest updates.
+
+Or you can start by using one of our starter templates:
+- [starter](https://github.com/nuxt-community/starter-template): Basic Nuxt.js project template
+- [express](https://github.com/nuxt-community/express-template): Nuxt.js + Express
+- [koa](https://github.com/nuxt-community/koa-template): Nuxt.js + Koa
+- [adonuxt](https://github.com/nuxt-community/adonuxt-template): Nuxt.js + AdonisJS
+- [micro](https://github.com/nuxt-community/micro-template): Nuxt.js + Micro
+- [nuxtent](https://github.com/nuxt-community/nuxtent-template): Nuxt.js + Nuxtent module for content heavy sites
 
 ## Using nuxt.js programmatically
 
 ```js
-const Nuxt = require('nuxt')
+const { Nuxt, Builder } = require('nuxt')
 
-// Launch nuxt build with given options
+// Import and set nuxt.js options
 let config = require('./nuxt.config.js')
+config.dev = (process.env.NODE_ENV !== 'production')
+
 let nuxt = new Nuxt(config)
+
+// Start build process (only in development)
+if (config.dev) {
+  new Builder(nuxt).build()
+}
 
 // You can use nuxt.render(req, res) or nuxt.renderRoute(route, context)
 ```
@@ -179,7 +190,7 @@ Learn more: https://nuxtjs.org/api/nuxt
 
 ## Using nuxt.js as a middleware
 
-You might want to use your own server with you configurations, your API and everything awesome your created with. That's why you can use nuxt.js as a middleware. It's recommended to use it at the end of your middleware since it will handle the rendering of your web application and won't call next().
+You might want to use your own server with your configurations, your API and everything awesome your created with. That's why you can use nuxt.js as a middleware. It's recommended to use it at the end of your middleware since it will handle the rendering of your web application and won't call next().
 
 ```js
 app.use(nuxt.render)
@@ -210,7 +221,7 @@ Learn more: https://nuxtjs.org/api/nuxt-render-route
 
 ## Examples
 
-Please take a look at https://nuxtjs.org/examples
+Please take a look at https://nuxtjs.org/examples or directly in https://github.com/nuxt/nuxt.js/tree/dev/examples.
 
 ## Production deployment
 
@@ -239,6 +250,21 @@ Then run `now` and enjoy!
 
 Note: we recommend putting `.nuxt` in `.npmignore` or `.gitignore`.
 
+## Core team
+
+| [Sebastien Chopin](https://github.com/Atinux) | [Alexandre Chopin](https://github.com/alexchopin) | [Pooya Parsa](https://github.com/pi0) | [Clark Du](https://github.com/clarkdo) |
+| --- | --- | --- | --- |
+| [![Atinux](https://avatars1.githubusercontent.com/u/904724?s=150&v=4)](https://github.com/Atinux) | [![alexchopin](https://avatars1.githubusercontent.com/u/4084277?s=150&v=4)](https://github.com/alexchopin) | [![pi0](https://avatars1.githubusercontent.com/u/5158436?s=150&v=4)](https://github.com/pi0) | [![clarkdo](https://avatars3.githubusercontent.com/u/4312154?s=150&v=4)](https://github.com/clarkdo) |
+
+## Contributors
+
+Thank you to all our [contributors](https://github.com/nuxt/nuxt.js/graphs/contributors)!
+
+## Contributing
+
+Please see our [CONTRIBUTING.md](./CONTRIBUTING.md)
+
+
 ## Roadmap
 
-https://github.com/nuxt/nuxt.js/projects/1
+https://trello.com/b/lgy93IOl/nuxtjs-10

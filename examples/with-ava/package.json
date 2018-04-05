@@ -1,5 +1,5 @@
 {
-  "name": "nuxt-with-ava",
+  "name": "example-with-ava",
   "scripts": {
     "dev": "nuxt",
     "build": "nuxt build",
@@ -11,6 +11,6 @@
     "jsdom": "^11.0.0"
   },
   "dependencies": {
-    "nuxt": "^1.0.0-alpha2"
+    "nuxt": "latest"
   }
 }

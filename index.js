@@ -1,16 +1,15 @@
 /*!
  * Nuxt.js
- * (c) 2016-2017 Chopin Brothers
- * Core maintainer: Pooya (@pi0)
+ * (c) 2016-2018 Chopin Brothers
+ * Core maintainers: Pooya Parsa (@pi0) - Clark Du (@clarkdo)
  * Released under the MIT License.
  */
 
-// Node Source Map Support
-// https://github.com/evanw/node-source-map-support
-require('source-map-support').install()
+const fs = require('fs')
+const path = require('path')
 
-// Fix babel flag
-/* istanbul ignore else */
-process.noDeprecation = true
-
-module.exports = require('./dist/nuxt')
+if (fs.existsSync(path.resolve(__dirname, '.babelrc'))) {
+  module.exports = require('./lib/index.js')
+} else {
+  module.exports = require('./dist/nuxt.js')
+}

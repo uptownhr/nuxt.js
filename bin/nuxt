@@ -1,15 +1,34 @@
 #!/usr/bin/env node
+const { join } = require('path')
+const semver = require('semver')
+const consola = require('consola')
+const { name, engines } = require('../package.json')
 
-const join = require('path').join
+// Global error handler
+process.on('unhandledRejection', _error => {
+  consola.error(_error)
+})
+
+// Exit process on fatal errors
+consola.add({
+  log(logObj) {
+    if (logObj.type === 'fatal') {
+      process.stderr.write('Nuxt Fatal Error :(\n')
+      process.exit(1)
+    }
+  }
+})
+
+if (!semver.satisfies(process.version, engines.node)) {
+  consola.fatal(
+    `The engine "node" is incompatible with ${name}. Expected version "${
+      engines.node
+    }".`
+  )
+}
 
 const defaultCommand = 'dev'
-const commands = new Set([
-  defaultCommand,
-  'init',
-  'build',
-  'start',
-  'generate'
-])
+const commands = new Set([defaultCommand, 'init', 'build', 'start', 'generate'])
 
 var cmd = process.argv[2]
 
@@ -20,12 +39,5 @@ if (commands.has(cmd)) {
 }
 
 const bin = join(__dirname, 'nuxt-' + cmd)
-
-// Console error unhandled promises
-process.on('unhandledRejection', function (err) {
-  /* eslint-disable no-console */
-  console.error(err)
-  console.error('[nuxt] Unhandled promise rejection: ' + err)
-})
 
 require(bin)

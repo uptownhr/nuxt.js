@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   head: {
     meta: [
       { charset: 'utf-8' },
@@ -9,5 +9,12 @@ module.exports = {
   css: [
     'bulma/css/bulma.css',
     '~/css/main.css'
-  ]
+  ],
+  render: {
+    bundleRenderer: {
+      shouldPreload: (file, type) => {
+        return ['script', 'style', 'font'].includes(type)
+      }
+    }
+  }
 }

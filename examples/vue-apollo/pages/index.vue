@@ -2,7 +2,7 @@
   <div>
     <h3>Cars</h3>
     <ul>
-      <li v-for="car in allCars">
+      <li v-for="car in allCars" :key="car.id">
         <nuxt-link :to="`car/${car.id}`">
           {{ car.year }} {{ car.make }} {{ car.model }}
         </nuxt-link>
@@ -12,21 +12,17 @@
 </template>
 
 <script>
-import client from '~plugins/apollo'
-import gql from 'graphql-tag'
+import allCars from '~/apollo/queries/allCars'
 
 export default {
   apollo: {
-    allCars: gql`
-      query {
-        allCars {
-          id
-          make
-          model
-          year
-        }
-      }
-    `
+    allCars: {
+      prefetch: true,
+      query: allCars
+    }
+  },
+  head: {
+    title: 'Cars with Apollo'
   }
 }
 </script>

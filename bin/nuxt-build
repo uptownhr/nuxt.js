@@ -1,22 +1,18 @@
 #!/usr/bin/env node
-
-// Show logs
-process.env.DEBUG = process.env.DEBUG || 'nuxt:*'
-
-const fs = require('fs')
 const parseArgs = require('minimist')
-const { Nuxt, Builder } = require('../')
-const resolve = require('path').resolve
-const debug = require('debug')('nuxt:build')
-debug.color = 2 // Force green color
+const consola = require('consola')
+const { Nuxt, Builder, Generator } = require('..')
+const { loadNuxtConfig } = require('./common/utils')
 
 const argv = parseArgs(process.argv.slice(2), {
   alias: {
     h: 'help',
     c: 'config-file',
-    a: 'analyze'
+    a: 'analyze',
+    s: 'spa',
+    u: 'universal'
   },
-  boolean: ['h', 'a'],
+  boolean: ['h', 'a', 's', 'u'],
   string: ['c'],
   default: {
     c: 'nuxt.config.js'
@@ -24,32 +20,24 @@ const argv = parseArgs(process.argv.slice(2), {
 })
 
 if (argv.help) {
-  console.log(`
+  process.stderr.write(`
     Description
       Compiles the application for production deployment
     Usage
       $ nuxt build <dir>
     Options
-      --analyze, -a       Launch webpack-bundle-analyzer to optimize your bundles.
-      --config-file, -c   Path to Nuxt.js config file (default: nuxt.config.js)
-      --help, -h          Displays this message
+      --analyze, -a        Launch webpack-bundle-analyzer to optimize your bundles.
+      --spa                Launch in SPA mode
+      --universal          Launch in Universal mode (default)
+      --generate           Generate static version after build
+      --config-file, -c    Path to Nuxt.js config file (default: nuxt.config.js)
+      --help, -h           Displays this message
   `)
   process.exit(0)
 }
 
-const rootDir = resolve(argv._[0] || '.')
-const nuxtConfigFile = resolve(rootDir, argv['config-file'])
+const options = loadNuxtConfig(argv)
 
-var options = {}
-if (fs.existsSync(nuxtConfigFile)) {
-  options = require(nuxtConfigFile)
-} else if (argv['config-file'] !== 'nuxt.config.js') {
-  console.error(`> Could not load config file ${argv['config-file']}`)
-  process.exit(1)
-}
-if (typeof options.rootDir !== 'string') {
-  options.rootDir = rootDir
-}
 // Create production build when calling `nuxt build`
 options.dev = false
 
@@ -59,15 +47,32 @@ if (argv.analyze) {
   options.build.analyze = true
 }
 
-debug('Building...')
 const nuxt = new Nuxt(options)
 const builder = new Builder(nuxt)
 
-builder.build()
-  .then(() => {
-    debug('Building done')
+// Setup hooks
+nuxt.hook('error', (_err) => consola.fatal(_err))
+
+// Close function
+const close = () => {
+  // In analyze mode wait for plugin
+  // emitting assets and opening browser
+  if (options.build.analyze === true) {
+    return
+  }
+
+  process.exit(0)
+}
+
+if (!argv.generate) {
+  // -- Build only --
+  builder
+    .build()
+    .then(() => close())
+    .catch(error => consola.fatal(error))
+} else {
+  // Generate dist for SPA static deployment
+  new Generator(nuxt, builder).generate({ build: true }).then(() => {
+    close()
   })
-  .catch((err) => {
-    console.error(err) // eslint-disable-line no-console
-    process.exit(1)
-  })
+}
